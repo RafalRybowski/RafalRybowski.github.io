@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        canvas {
+            border: 1px solid #d3d3d3;
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body onload="startGame()">
+    <script>
+
+        var myGamePiece;
+        var ball;
+        var keyPresed = false;
+
+        function startGame() {
+            myGamePiece = new component(100, 20, "red", 240, 470, 5);
+            ball = new ballCreator(10, "blue", 100, 100, 5);
+            myGameArea.start();
+        }
+
+        var myGameArea = {
+            canvas: document.createElement("canvas"),
+            start: function () {
+                this.canvas.width = 500;
+                this.canvas.height = 500;
+                this.context = this.canvas.getContext("2d");
+                document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+                this.interval = setInterval(updateGameArea, 20);
+                window.addEventListener('keydown', function (e) {
+                    myGameArea.key = e.keyCode;
+                    keyPresed = true;
+                })
+                window.addEventListener('keyup', function (e) {
+                    myGameArea.key = false;
+                })
+            },
+            clear: function () {
+                this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+        }
+
+        function component(width, height, color, x, y, speed) {
+            this.speed = speed;
+            this.width = width;
+            this.height = height;
+            this.speedX = 0;
+            this.x = x;
+            this.y = y;
+            this.update = function () {
+                ctx = myGameArea.context;
+                ctx.fillStyle = color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+            }
+            this.newPos = function () {
+                if(this.speedX < 0) {
+                    if(this.x > 0) {
+                        this.x += this.speedX * this.speed;
+                    }
+                } else {
+                    if(myGameArea.canvas.width > this.x + this.width) {
+                        this.x += this.speedX * this.speed;
+                    }
+                }
+            }
+        }
+
+        function ballCreator(radius, color, x, y, speed) {
+            this.radius = radius;
+            this.speedX = speed;
+            this.speedY = speed;
+            this.x = x;
+            this.y = y;
+            this.update = function () {
+                ctx = myGameArea.context;
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, radius, 0, 2 * Math.PI);
+                ctx.closePath();    
+                ctx.fill();
+            }
+            this.newPos = function () {
+                if(this.speedX < 0) {
+                    if(this.x - this.radius < 0) {
+                        this.speedX *= -1;
+                    }
+                } else {
+                    if(myGameArea.canvas.width < this.x + this.radius) {
+                        this.speedX *= -1;
+                    }
+                }
+                if(this.speedY < 0) {
+                    if(this.y - this.radius < 0) {
+                        this.speedY *= -1;
+                    }
+                } else {
+                    if(myGameArea.canvas.height < this.y + this.radius) {
+                        this.speedY *= -1;
+                    }
+                }
+                this.x += this.speedX;
+                this.y += this.speedY;
+            }
+            this.colision = function (otherobj) {
+                var x=this.x + this.radius;
+		        var y=this.y + this.radius;
+            }
+        }
+
+        function moveleft() {
+            myGamePiece.speedX = -1;
+        }
+
+        function moveright() {
+            myGamePiece.speedX = 1;
+        }
+
+        function clearmove() {
+            myGamePiece.speedX = 0;
+            myGamePiece.speedY = 0;
+        }
+
+        function updateGameArea() {
+            myGameArea.clear();
+            if(myGameArea.key) {
+                if (myGameArea.key == 37) { moveleft(); }
+                if (myGameArea.key == 39) { moveright(); }
+            } else {
+                if(keyPresed) {
+                    clearmove();
+                    keyPresed = false;
+                }
+            }
+            ball.colision(myGamePiece);
+            ball.newPos();
+            ball.update();
+            myGamePiece.newPos();
+            myGamePiece.update();
+        }
+        
+    </script>
+    <div style="text-align:center;width:480px;">
+        <button onmousedown="moveleft()" onmouseup="clearmove()" ontouchstart="moveleft()">LEFT</button>
+        <button onmousedown="moveright()" onmouseup="clearmove()" ontouchstart="moveright()">RIGHT</button><br><br>
+    </div>
+</body>
+</html>
