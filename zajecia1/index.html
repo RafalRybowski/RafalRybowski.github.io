@@ -6,6 +6,11 @@
         canvas {
             border: 1px solid #d3d3d3;
             background-color: #f1f1f1;
+            padding-left: 0;
+            padding-right: 0;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
         }
     </style>
 </head>
@@ -15,6 +20,7 @@
         var myGamePiece;
         var ball;
         var keyPresed = false;
+        var paused = false;
 
         function startGame() {
             myGamePiece = new component(100, 20, "red", 240, 470, 5);
@@ -98,15 +104,20 @@
                     }
                 } else {
                     if(myGameArea.canvas.height < this.y + this.radius) {
-                        this.speedY *= -1;
+                        window.alert("Przegrales");
+                        clearInterval(myGameArea.interval);
+                        startGame();
                     }
                 }
                 this.x += this.speedX;
                 this.y += this.speedY;
             }
             this.colision = function (otherobj) {
-                var x=this.x + this.radius;
-		        var y=this.y + this.radius;
+                if (this.y + this.radius > otherobj.y) {
+                    if (this.x > otherobj.x && this.x < otherobj.x + otherobj.width) {
+                        this.speedY *= -1;
+                    }
+                }
             }
         }
 
@@ -134,17 +145,30 @@
                     keyPresed = false;
                 }
             }
-            ball.colision(myGamePiece);
-            ball.newPos();
             ball.update();
-            myGamePiece.newPos();
             myGamePiece.update();
+            if(!paused) {
+                ball.colision(myGamePiece);
+                ball.newPos();
+                myGamePiece.newPos();
+            }
+        }
+
+        function pause() {
+            paused = true;
+
+        }
+
+        function start() {
+            paused = false;
         }
         
     </script>
     <div style="text-align:center;width:480px;">
         <button onmousedown="moveleft()" onmouseup="clearmove()" ontouchstart="moveleft()">LEFT</button>
         <button onmousedown="moveright()" onmouseup="clearmove()" ontouchstart="moveright()">RIGHT</button><br><br>
+        <button onclick="pause()">PAUSE</button>
+        <button onclick="start()">START</button><br><br>
     </div>
 </body>
 </html>
