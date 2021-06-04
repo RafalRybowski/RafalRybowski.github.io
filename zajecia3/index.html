@@ -146,7 +146,7 @@
             if(paused == false) {
                 time++;
                 document.getElementById("time").innerHTML = time;
-                if(myGameArea.mode) {
+                if(mode) {
                     if(time % 20 == 0) {
                         updateModeTwo();
                     }
@@ -256,8 +256,8 @@
             var i = 0;
             do {
                 i = 0;
-                this.x = getRandomInt(500 - this.radius * 2) + this.radius;
-                this.y = getRandomInt(400 - this.radius * 2)  + this.radius;
+                this.x = getRandomInt(640 - this.radius * 2) + this.radius;
+                this.y = getRandomInt(380 - this.radius * 2)  + this.radius;
                 rowsBeam.forEach(function(item, index, array) {
                     if(item.show) {
                         if (this.y + this.radius > item.y && this.y - this.radius < item.y + item.height) {
