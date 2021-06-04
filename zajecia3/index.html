@@ -167,7 +167,7 @@
                 }
             });
             if (count < max && count > min) {
-                var modulo = getRandomInt(10);
+                var modulo = getRandomInt(10) + 1;
                 if(count % modulo == 0) {
                     if(count + add <= max) {
                         showRandomBrick(add);
