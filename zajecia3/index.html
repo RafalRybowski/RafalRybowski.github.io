@@ -81,6 +81,8 @@
             gameData.push(value);
          }
 
+        var rowsWidth = 50;
+        var rowsHeight = 20;
         var rowsBeam = [];
         var mode = false; //false - mode 1; true - mode 2
         var score = 0;
@@ -94,12 +96,13 @@
         var backgroundImage = new Image();
 
         function startGame(width, height) {
-            score = 0
-            backgroundImage.src = "breakout_bg.png"
+            score = 0;
+            backgroundImage.src = "breakout_bg.png";
             scoreSecoundBall = 0;
             time = 0;
+            document.getElementById("time").innerHTML = time;
             paused = true;
-            rowsBeam = []
+            rowsBeam = [];
             myGamePiece = new component(128, 23, "red", 240, height - 23, 5, false);
             if(document.getElementById("turn").checked) {
                 leftGamePiece = new component(20, 100, "red", 0, 300, 5, true);
@@ -142,7 +145,66 @@
         function timer() {
             if(paused == false) {
                 time++;
+                document.getElementById("time").innerHTML = time;
+                if(myGameArea.mode) {
+                    if(time % 20 == 0) {
+                        updateModeTwo();
+                    }
+                } else {
+                    updateModeOne();
+                }
             }
+        }
+
+        function updateModeOne() {
+            var add = 3;
+            var max = 25;
+            var min = 0;
+            var count = 0;
+            rowsBeam.forEach(function(item, index, array) {
+                if(item.show) {
+                    count += 1;
+                }
+            });
+            if (count < max && count > min) {
+                var modulo = getRandomInt(10);
+                if(count % modulo == 0) {
+                    if(count + add <= max) {
+                        showRandomBrick(add);
+                    } else {
+                        showRandomBrick(max - count);
+                    }
+                }
+            } else if(count <= min) {
+                showRandomBrick(max - count);
+            }
+        }
+
+        function showRandomBrick(num) {
+            var i = 0;
+            var added = 0;
+            var tmp = [];
+            rowsBeam.forEach(function(item, index, array) {
+                if(!item.show) {
+                    tmp.push(index);
+                }
+            })
+            for(var i = 0; i < num; i++) {
+                var random = getRandomInt(tmp.length);
+                rowsBeam[tmp[random]].show = true;
+                tmp.slice(random,1);
+            }
+        }
+
+        function updateModeTwo() {
+            rowsBeam.forEach(function(item, index, array) {
+                item.down();
+            })
+            var y = 70;
+            for(let j = 0; j < 10; j++) {
+                var x = 70 + rowsWidth * j;
+                rowsBeam.push(new createBeam(rowsWidth, rowsHeight, x, y));
+            } 
         }
 
         function component(width, height, color, x, y, speed, vertical) {
@@ -191,9 +253,26 @@
             this.copies = [];
             this.radius = radius;
             this.speed = speed;
-            this.x = getRandomInt(500 - this.radius * 2) + this.radius;
-            var beam = rowsBeam[rowsBeam.length - 1];
-            this.y = getRandomInt(400 - beam.y - beam.height) + (beam.y + beam.height) + this.radius;
+            var i = 0;
+            do {
+                i = 0;
+                this.x = getRandomInt(500 - this.radius * 2) + this.radius;
+                this.y = getRandomInt(400 - this.radius * 2)  + this.radius;
+                rowsBeam.forEach(function(item, index, array) {
+                    if(item.show) {
+                        if (this.y + this.radius > item.y && this.y - this.radius < item.y + item.height) {
+                            if (this.x > item.x && this.x < item.x + item.width) {
+                                i = 1;
+                            }
+                        }
+                        if (this.x + this.radius > item.x && this.x - this.radius < item.x + item.width) {
+                            if (this.y > item.y && this.y < item.y + item.height) {
+                                i = 1;
+                            }
+                        }
+                    }
+                });
+            } while( i > 0)
             for(var i = 0; i < 5; i ++) {
                 this.copies.push(
                     {
@@ -345,13 +424,11 @@
         }
 
         function createRowBeams() {
-            var width = 50;
-            var height = 20;
             for (let i = 0; i < 3; i++) {
-                var y = 70 + height * i;
+                var y = 70 + rowsHeight * i;
                 for(let j = 0; j < 10; j++) {
-                    var x = 70 + width * j;
-                    rowsBeam.push(new createBeam(width, height, x, y));
+                    var x = 70 + rowsWidth * j;
+                    rowsBeam.push(new createBeam(rowsWidth, rowsHeight, x, y));
                 }
             }
         }
@@ -372,6 +449,10 @@
             this.update = function () {
                 ctx = myGameArea.context;
                 ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+            }
+
+            this.down = function () {
+                this.y += this.height;
             }
 
             this.hitted = function () {
@@ -544,6 +625,8 @@
     <div style="text-align:center;width:480px;">
         <p>Score:</p>
         <p id="score"></p><br>
+        <p>Time:</p>
+        <p id="time"></p><br>
         <button onmousedown="moveleft()" onmouseup="clearmove()" ontouchstart="moveleft()" style="display: none;">LEFT</button>
         <button onmousedown="moveright()" onmouseup="clearmove()" ontouchstart="moveright()" style="display: none;">RIGHT</button><br><br>
         <button onclick="pause()">PAUSE</button>
