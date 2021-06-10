@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css">
     <style>
         canvas {
             border: 1px solid #d3d3d3;
@@ -16,6 +17,46 @@
 </head>
 <body onload="startGame(640, 480)">
     <script>
+
+        class Server {
+            config = {
+                Register_Link: "link1", 
+                Login_Link: "link1", 
+                Upload_Data_Link: "link1", 
+                Download_Data_Link: "link1"
+            }
+
+            constructor() {}
+
+            login(login, password) {
+                return ""
+            }
+
+            register(login, password) {
+                
+            }
+
+            get download() {
+                return ""
+            }
+
+            upload(data) {}
+        }
+
+        var config = {
+            Register_Link: "link1", 
+            Login_Link: "link1", 
+            Upload_Data_Link: "link1", 
+            Download_Data_Link: "link1"
+        }
+
+        class ServerConnection {
+            constructor() {
+                this.connection = new ActiveXObject("ADODB.Connection") ;
+                var connectionstring="Data Source=<server>;Initial Catalog=<catalog>;User ID=<user>;Password=<password>;Provider=SQLOLEDB";
+                this.connection.Open(connectionstring);
+            }
+        }
 
         function getRandomInt(max) {
             return Math.floor(Math.random() * max);
@@ -69,8 +110,15 @@
          function add() {
             var date = new Date();
             var request = db.transaction(["score"], "readwrite")
+            var mod = "";
+            if(mode) {
+                mod = "TWO"
+            } else {
+                mod = "ONE"
+            }
             var value = {
                     id: gameData.length,
+                    TRYB_GRY: mod.toString(),
                     NICK: "NICK", 
                     DATA: date.getDate() + "-" + date.getMonth() + "-" + date.getFullYear(), 
                     PKT: score,
@@ -105,7 +153,7 @@
             rowsBeam = [];
             myGamePiece = new component(128, 23, "red", 240, height - 23, 5, false);
             if(document.getElementById("turn").checked) {
-                leftGamePiece = new component(20, 100, "red", 0, 300, 5, true);
+                leftGamePiece = new component(23, 128, "red", 0, 300, 5, true);
             }
             createRowBeams();
             ball = new ballCreator(8, "blue", 3);
@@ -209,7 +257,11 @@
 
         function component(width, height, color, x, y, speed, vertical) {
             this.image = new Image();
-            this.image.src = "bell.png";
+            if(vertical) {
+                this.image.src = "bell_rotate.png";
+            } else {
+                this.image.src = "bell.png";
+            }
             this.speed = speed;
             this.width = width;
             this.height = height;
@@ -609,6 +661,7 @@
             var text = "";
             for (var i = 0; i < gameData.length; ++i) {
                 text += "id " + gameData[i].id + " " + 
+                "MODE " + gameData[i].TRYB_GRY + " " + 
                 "NICK " + gameData[i].NICK+ " " +  
                 "DATA " + gameData[i].DATA + " " +
                 "PKT " + gameData[i].PKT + " " +
@@ -620,9 +673,33 @@
         function hide() {
             document.getElementById("list").innerHTML = "";
         }
+
+        function openLoginForm() {
+            document.getElementById("lognForm").style.display = "block";
+        }
+
+        function closeLoginForm() {
+            document.getElementById("lognForm").style.display = "none";
+        }
+
+        function openRegisterForm() {
+            document.getElementById("registerForm").style.display = "block";
+        }
+
+        function closeRegisterForm() {
+            document.getElementById("registerForm").style.display = "none";
+        }
+
         
     </script>
-    <div style="text-align:center;width:480px;">
+    <div class="vertical-menu" style="display: inline-block;">
+        <p>Menu</a>
+        <button onclick="openLoginForm()">Open Login Form</button>
+        <button onclick="openRegisterForm()">Open Register Form</button>
+        <button >Update data</button>
+        <button >login data</button>
+      </div>
+    <div style="text-align:center;width:480px;display: inline-block;">
         <p>Score:</p>
         <p id="score"></p><br>
         <p>Time:</p>
@@ -639,7 +716,34 @@
             <button onclick="hide()">schowaj liste</button>
         </div>
     </div>
-
+    <div class="form-popup-login" id="lognForm">
+        <form class="form-container">
+          <h1>Login</h1>
+      
+          <label for="email"><b>Email</b></label>
+          <input type="text" placeholder="Enter Email" name="email" required>
+      
+          <label for="psw"><b>Password</b></label>
+          <input type="password" placeholder="Enter Password" name="psw" required>
+      
+          <button type="submit" class="btn">Login</button>
+          <button type="button" class="btn cancel" onclick="closeLoginForm()">close</button>
+        </form>
+    </div>
+    <div class="form-popup-register" id="registerForm">
+        <form class="form-container">
+          <h1>Register</h1>
+      
+          <label for="email"><b>Email</b></label>
+          <input type="text" placeholder="Enter Email" name="email" required>
+      
+          <label for="psw"><b>Password</b></label>
+          <input type="password" placeholder="Enter Password" name="psw" required>
+      
+          <button type="submit" class="btn">Register</button>
+          <button type="button" class="btn cancel" onclick="closeRegisterForm()">close</button>
+        </form>
+    </div>
     
 </body>
 </html>
