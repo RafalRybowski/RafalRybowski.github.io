@@ -34,8 +34,6 @@
 
         class Server {
 
-            // worker = new Worker('.\myWorker.js')
-
             login = ""
             loginId = -1;
 
@@ -222,7 +220,7 @@
             }
             createRowBeams();
             balls = [];
-            balls.push(new ballCreator(8, "blue", 3));
+            balls.push(new ballCreator(8, "blue", 4));
             myGameArea.start(width, height);
         }
 
@@ -612,7 +610,7 @@
                 if(!this.type) {
                     scoreSecoundBall += 1;
                     if(scoreSecoundBall % 5 == 0) {
-                        balls.push(new ballCreator(8, "white", 3));
+                        balls.push(new ballCreator(8, "white", 4));
                     }
                 } else {
                     powerUp(this.x, this.y);
@@ -758,16 +756,99 @@
             }
         }
 
+        function calculateMove() {
+            if(balls.length == 1) {
+                if(balls[0].x <= myGamePiece.x + myGamePiece.width / 2) {
+                    if(invertedTime > 0) {
+                        moveright();
+                    } else {
+                        moveleft();
+                    }
+                } else if(balls[0].x > myGamePiece.x + myGamePiece.width / 2) {
+                    if(invertedTime > 0) {
+                        moveleft();
+                    } else {
+                        moveright();
+                    }
+                }
+                return;
+            }
+            var highPr = [];
+            var lowPr = [];
+            balls.forEach(function(ball, index, array) {
+                if(ball.speedY > 1) {
+                    highPr.push(ball);
+                } else {
+                    lowPr.push(ball);
+                }
+            });
+            highPr.sort(function(a, b) {
+                return a.y - b.y
+            })
+            lowPr.sort(function(a, b) {
+                return a.y - b.y
+            })
+            highPr.forEach(function(ball, index, array) {
+                if(checkIfCanCatch(ball) && !c) {
+                    if(balls[0].x < myGamePiece.x + myGamePiece.width / 2 + 5) {
+                        moveleft();
+                    } else if(balls[0].x > myGamePiece.x + myGamePiece.width / 2 - 5) {
+                        moveright();
+                    }
+                    c = true;
+                }
+            });
+            if(c) {
+                lowPr.forEach(function(ball, index, array) {
+                    if(checkIfCanCatch(ball) && !c) {
+                        if(balls[0].x < myGamePiece.x + myGamePiece.width / 2 + 5) {
+                            moveleft();
+                        } else if(balls[0].x > myGamePiece.x + myGamePiece.width / 2 - 5) {
+                            moveright();
+                        }
+                        c = true;
+                    }
+                }); 
+            }
+            var c = false;
+        }
+
+        function checkIfCanCatch(ball) {
+            if(ball.x < myGamePiece.x + myGamePiece.width / 2 + 5) {
+                var time = myGamePiece.y - ball.y + ball.radius
+                if(ball.x + ball.speedX * time <= myGamePiece.x + myGamePiece.width) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else if(ball.x > myGamePiece.x + myGamePiece.width / 2 - 5) {
+                var time = myGamePiece.y - ball.y + ball.radius
+                if(ball.x + ball.speedX * time >= myGamePiece.x + myGamePiece.width) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+
+        function movment() {
+            if(document.getElementById("aipseudo").checked) {
+                calculateMove();
+            } else {
+                if(myGameArea.key) {
+                    if (myGameArea.key == 37) { moveleft(); }
+                    if (myGameArea.key == 39) { moveright(); }
+                    if(leftGamePiece != null) {
+                        if (myGameArea.key == 38) { moveUp(); }
+                        if (myGameArea.key == 40) { moverDown(); }
+                    }
+                } 
+            }
+        }
+
         function updateGameArea() {
             myGameArea.clear();
-            if(myGameArea.key) {
-                if (myGameArea.key == 37) { moveleft(); }
-                if (myGameArea.key == 39) { moveright(); }
-                if(leftGamePiece != null) {
-                    if (myGameArea.key == 38) { moveUp(); }
-                    if (myGameArea.key == 40) { moverDown(); }
-                }
-            } 
+            movment();
             if(!paused) {
                 checkCollision();
                 newPosition();
@@ -1014,6 +1095,8 @@
         <button onclick="start()">START</button><br><br>
         lewy panel wlaczony na start gry?
         <input id="turn" type="checkbox"><br>
+        AI
+        <input id="aipseudo" type="checkbox"><br>
         <button onClick="checkList()">sprawdz liste</button>
         <div>
             <p id="list"></p>
