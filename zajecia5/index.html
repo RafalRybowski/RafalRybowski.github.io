@@ -757,76 +757,17 @@
         }
 
         function calculateMove() {
-            if(balls.length == 1) {
-                if(balls[0].x <= myGamePiece.x + myGamePiece.width / 2) {
-                    if(invertedTime > 0) {
-                        moveright();
-                    } else {
-                        moveleft();
-                    }
-                } else if(balls[0].x > myGamePiece.x + myGamePiece.width / 2) {
-                    if(invertedTime > 0) {
-                        moveleft();
-                    } else {
-                        moveright();
-                    }
-                }
-                return;
-            }
-            var highPr = [];
-            var lowPr = [];
-            balls.forEach(function(ball, index, array) {
-                if(ball.speedY > 1) {
-                    highPr.push(ball);
+            if(balls[0].x <= myGamePiece.x + myGamePiece.width / 2) {
+                if(invertedTime > 0) {
+                    moveright();
                 } else {
-                    lowPr.push(ball);
+                    moveleft();
                 }
-            });
-            highPr.sort(function(a, b) {
-                return a.y - b.y
-            })
-            lowPr.sort(function(a, b) {
-                return a.y - b.y
-            })
-            highPr.forEach(function(ball, index, array) {
-                if(checkIfCanCatch(ball) && !c) {
-                    if(balls[0].x < myGamePiece.x + myGamePiece.width / 2 + 5) {
-                        moveleft();
-                    } else if(balls[0].x > myGamePiece.x + myGamePiece.width / 2 - 5) {
-                        moveright();
-                    }
-                    c = true;
-                }
-            });
-            if(c) {
-                lowPr.forEach(function(ball, index, array) {
-                    if(checkIfCanCatch(ball) && !c) {
-                        if(balls[0].x < myGamePiece.x + myGamePiece.width / 2 + 5) {
-                            moveleft();
-                        } else if(balls[0].x > myGamePiece.x + myGamePiece.width / 2 - 5) {
-                            moveright();
-                        }
-                        c = true;
-                    }
-                }); 
-            }
-            var c = false;
-        }
-
-        function checkIfCanCatch(ball) {
-            if(ball.x < myGamePiece.x + myGamePiece.width / 2 + 5) {
-                var time = myGamePiece.y - ball.y + ball.radius
-                if(ball.x + ball.speedX * time <= myGamePiece.x + myGamePiece.width) {
-                    return true;
+            } else if(balls[0].x > myGamePiece.x + myGamePiece.width / 2) {
+                 if(invertedTime > 0) {
+                    moveleft();
                 } else {
-                    return false;
-                }
-            } else if(ball.x > myGamePiece.x + myGamePiece.width / 2 - 5) {
-                var time = myGamePiece.y - ball.y + ball.radius
-                if(ball.x + ball.speedX * time >= myGamePiece.x + myGamePiece.width) {
-                    return true;
-                } else {
-                    return false;
+                    moveright();
                 }
             }
         }
